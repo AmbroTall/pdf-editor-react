@@ -1,0 +1,228 @@
+<div class="toolbar">
+    <div class="nav-cont">
+        <button class="choose-pdf" onclick="pressed()">Choose PDF</button>
+        <input type="file" id="fileInput" onchange="getData()"/>
+        <div class="nav-icons">
+            <i class="fa-solid fa-arrow-pointer"></i>
+            <i class="fa-solid fa-paintbrush"></i>
+            <i class="fa-solid fa-pen-clip"></i>
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+            <i class="fa-solid fa-arrow-rotate-right"></i>
+        </div>
+        <div class="nav-input">
+            <input type="text" class="rename-input" id="pdf-name" placeholder="Rename your PDF here"/>
+            <i class="fa-solid fa-pen-to-square" class="edit-icon"></i>
+        </div>
+        <button class="choose-pdf">Save</button>
+    </div>
+    <!-- <div class="tool">
+        <span>PDFJS + FabricJS + jsPDF</span>
+    </div>
+    <div class="tool">
+        <label for="">Brush size</label>
+        <input type="number" class="form-control text-right" value="1" id="brush-size" max="50">
+    </div>
+    <div class="tool">
+        <label for="">Font size</label>
+        <select id="font-size" class="form-control">
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="16" selected>16</option>
+            <option value="18">18</option>
+            <option value="24">24</option>
+            <option value="32">32</option>
+            <option value="48">48</option>
+            <option value="64">64</option>
+            <option value="72">72</option>
+            <option value="108">108</option>
+        </select>
+    </div>
+    <div class="tool">
+        <button class="color-tool active" style="background-color: #212121;"></button>
+        <button class="color-tool" style="background-color: red;"></button>
+        <button class="color-tool" style="background-color: blue;"></button>
+        <button class="color-tool" style="background-color: green;"></button>
+        <button class="color-tool" style="background-color: yellow;"></button>
+    </div>
+    <div class="tool">
+        <button class="tool-button active"><i class="fa fa-hand-paper-o" title="Free Hand" onclick="enableSelector(event)"></i></button>
+    </div>
+    <div class="tool">
+        <button class="tool-button"><i class="fa fa-pencil" title="Pencil" onclick="enablePencil(event)"></i></button>
+    </div>
+    <div class="tool">
+        <button class="tool-button"><i class="fa fa-font" title="Add Text" onclick="enableAddText(event)"></i></button>
+    </div>
+    <div class="tool">
+        <button class="tool-button"><i class="fa fa-long-arrow-right" title="Add Arrow" onclick="enableAddArrow(event)"></i></button>
+    </div>
+    <div class="tool">
+        <button class="tool-button"><i class="fa fa-square-o" title="Add rectangle" onclick="enableRectangle(event)"></i></button>
+    </div>
+    <div class="tool">
+        <button class="tool-button"><i class="fa fa-picture-o" title="Add an Image" onclick="addImage(event)"></i></button>
+    </div>
+    <div class="tool">
+        <button class="btn btn-danger btn-sm" onclick="deleteSelectedObject(event)"><i class="fa fa-trash"></i></button>
+    </div>
+    <div class="tool">
+        <button class="btn btn-danger btn-sm" onclick="clearPage()">Clear Page</button>
+    </div>
+    <div class="tool">
+        <button class="btn btn-info btn-sm" onclick="showPdfData()">{}</button>
+    </div>
+    <div class="tool">
+        <button class="btn btn-light btn-sm" onclick="savePDF()"><i class="fa fa-save"></i> Save</button>
+    </div> -->
+</div>
+<div class="nav-input-res">
+    <i class="fa-solid fa-pen-to-square" class="edit-icon"></i>
+    <input type="text" class="rename-input" placeholder="Rename your PDF here"/>
+</div>
+<p style="margin-top: 48px;" id="fileLabel">Tall</p>
+
+
+<div id="pdf-container"></div>
+<div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataModalLabel">PDF annotation data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <pre class="prettyprint lang-json linenums">
+                </pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+			
+    // let nameFile = ''
+    // function getData(){
+    // 	let a = document.getElementById('fileInput').files[0];
+    // 	let b = document.getElementById('pdf-name')
+    // 	b.value = a.name
+    // 	if(document.getElementById('pdf-name').value == ''){
+    // 		nameFile = null 
+    // 	}else{
+    // 		nameFile = document.getElementById('pdf-name').value.name
+    // 	}
+    // }
+    // console.log(a)
+    
+
+    
+    // function pressed(){
+    // 	document.getElementById('fileInput').click();
+    // 	getData()
+    // }
+    
+    
+
+    console.log("No",nameFile)
+    
+
+    var pdf = new PDFAnnotate("pdf-container",nameFile, {
+        onPageUpdated(page, oldData, newData) {
+            console.log(page, oldData, newData);
+        },
+        ready() {
+            console.log("Plugin initialized successfully");
+        },
+        scale: 1.5,
+        pageImageCompression: "MEDIUM", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+        });
+
+        function changeActiveTool(event) {
+            var element = $(event.target).hasClass("tool-button")
+            ? $(event.target)
+            : $(event.target).parents(".tool-button").first();
+            $(".tool-button.active").removeClass("active");
+            $(element).addClass("active");
+        }
+
+        function enableSelector(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enableSelector();
+        }
+
+        function enablePencil(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enablePencil();
+        }
+
+        function enableAddText(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enableAddText();
+        }
+
+        function enableAddArrow(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.enableAddArrow();
+        }
+
+        function addImage(event) {
+            event.preventDefault();
+            pdf.addImageToCanvas()
+        }
+
+        function enableRectangle(event) {
+            event.preventDefault();
+            changeActiveTool(event);
+            pdf.setColor('rgba(255, 0, 0, 0.3)');
+            pdf.setBorderColor('blue');
+            pdf.enableRectangle();
+        }
+
+        function deleteSelectedObject(event) {
+        event.preventDefault();
+        pdf.deleteSelectedObject();
+        }
+
+        function savePDF() {
+            // pdf.savePdf();
+            pdf.savePdf('sample.pdf'); // save with given file name
+        }
+
+        function clearPage() {
+            pdf.clearActivePage();
+        }
+
+        function showPdfData() {
+            var string = pdf.serializePdf();
+            $('#dataModal .modal-body pre').first().text(string);
+            PR.prettyPrint();
+            $('#dataModal').modal('show');
+        }
+
+        $(function () {
+            $('.color-tool').click(function () {
+                $('.color-tool.active').removeClass('active');
+                $(this).addClass('active');
+                color = $(this).get(0).style.backgroundColor;
+                pdf.setColor(color);
+            });
+
+            $('#brush-size').change(function () {
+                var width = $(this).val();
+                pdf.setBrushSize(width);
+            });
+
+            $('#font-size').change(function () {
+                var font_size = $(this).val();
+                pdf.setFontSize(font_size);
+            });
+        });
+
+</script>
