@@ -144,6 +144,16 @@
 		.dropdown:hover .dropbtn {background-color: #3e8e41;}
 
 		@media only screen and (max-width: 768px){
+			#pdf-container {
+				max-width: 90%;
+				/* height: 492px; */
+			}
+
+			canvas, .canvas-container {
+				max-width: 90%;
+				/* max-height: 492px; */
+				margin-bottom: 25px;
+			}
 			.toolbar{
 				width: 100%;
 			}
@@ -185,12 +195,12 @@
 
 		@media only screen and (max-width: 300px){
 			#pdf-container {
-				max-width: 275px;
+				max-width: 90%;
 				height: 492px;
 			}
 
 			canvas, .canvas-container {
-				max-width: 270px;
+				max-width: 90%;
 				max-height: 492px;
 				margin-bottom: 25px;
 			}
@@ -226,6 +236,55 @@
 		}
 
 
+		@media only screen and (max-width: 450px){
+			#pdf-container {
+				max-width: 90%;
+				height: 492px;
+			}
+
+			canvas, .canvas-container {
+				max-width: 90%;
+				max-height: 492px;
+				margin-bottom: 25px;
+			}
+			.toolbar{
+				width: 100%;
+				display: flex;
+				align-items: center;
+				/* justify-content: flex-start; */
+			}
+	
+			.nav-icons{
+				margin-left: 5px;
+				
+			}
+		}
+
+		@media only screen and (max-width: 385px){
+			.choose-pdf, .choose-pdf-res,.save-pdf{
+				font-weight:900;
+				font-size:10px;
+				padding:10px 5px;
+				margin-right: 5px;
+			
+			}
+			
+			#home-icon{
+				font-size: 25px;
+				margin-left: 3px;
+				cursor: pointer;
+			}
+
+			.nav-icons i, .nav-input i,.home-icon{
+			font-size: 12px;
+			padding: 0 3px;
+			}
+
+			.nav-icons{
+				margin-left: 5px;
+				
+			}
+		}
 
 
 		
