@@ -411,10 +411,10 @@
 				<input type="file" id="fileInput" onchange="getData()" />
 				<div class="nav-icons">
 					<i class="fa-solid fa-arrow-pointer" onclick="enableScroll()"></i>
-					<i class="fa-solid fa-paintbrush" class="tool-button" onclick="enableThickPencil(event)"></i>
-					<i class="fa-solid fa-pen-clip" class="tool-button" onclick="enableThinPencil(event)"></i>
-					<i class="fa-solid fa-arrow-rotate-left" id="redo" onclick="deleteSelectedObject()" ></i>
-					<i class="fa-solid fa-arrow-rotate-right" id="undo" ></i>
+					<i class="fa-solid fa-paintbrush" onclick="enableThickPencil(event)"></i>
+					<i class="fa-solid fa-pen-clip" onclick="enableThinPencil(event)"></i>
+					<i class="fa-solid fa-arrow-rotate-left" onclick="undo(event)" ></i>
+					<i class="fa-solid fa-arrow-rotate-right" onclick="redo(event)" ></i>
 				</div>
 				<div class="nav-input">
 					<input type="text" class="rename-input" id="pdf-name" placeholder="Rename your PDF here"/>
@@ -476,8 +476,8 @@
 		type: 'lineArrow',
 
 		initialize: function(element, options) {
-		options || (options = {});
-		this.callSuper('initialize', element, options);
+			options || (options = {});
+			this.callSuper('initialize', element, options);
 		},
 
 		toObject: function() {
@@ -623,6 +623,7 @@
 			this.active_tool = 1; // 1 - Free hand, 2 - Text, 3 - Arrow, 4 - Rectangle
 			this.fabricObjects = [];
 			this.fabricObjectsData = [];
+			this.isRedoing = false
 			this.color = '#212121';
 			this.borderColor = '#000000';
 			this.borderSize = 1;
@@ -686,8 +687,10 @@
 							var oldValue = Object.assign({}, inst.fabricObjectsData[index]);
 							inst.fabricObjectsData[index] = fabricObj.toJSON()
 							options.onPageUpdated(index + 1, oldValue, inst.fabricObjectsData[index]) 
-						})
+						}) 
+						// isRedoing = false
 					}
+					
 					fabricObj.setBackgroundImage(background, fabricObj.renderAll.bind(fabricObj));
 					$(fabricObj.upperCanvasEl).click(function (event) {
 						inst.active_canvas = index;
@@ -720,6 +723,31 @@
 			}
 		}
 
+
+		var h = []
+		
+		PDFAnnotate.prototype.undoLast = function(){
+			var inst = this;
+			var fabricObj = inst.fabricObjects[inst.active_canvas];
+			if ( fabricObj._objects.length> 0) {
+				h.push(fabricObj._objects.pop());
+			}
+			fabricObj.renderAll()
+
+		}
+
+
+		PDFAnnotate.prototype.redoLast = function(){
+			var inst = this;
+			var fabricObj = inst.fabricObjects[inst.active_canvas]
+			if(h.length>0){
+				fabricObj.add(h.pop());
+			}
+		}
+		
+			
+		
+
 		PDFAnnotate.prototype.enableSelector = function () {
 			var inst = this;
 			inst.active_tool = 0;
@@ -730,15 +758,7 @@
 			}
 		}
 
-		PDFAnnotate.prototype.removeLast = function(){
-			var inst = this;
-			if (inst.fabricObjects.length > 0) {
-				$.each(inst.fabricObjects, function (index, fabricObj) {
-					fabricObj.pop()
-				});
-			}
-
-		}
+	
 
 		PDFAnnotate.prototype.enablePencil = function () {
 			var inst = this;
@@ -898,14 +918,23 @@
 			this.borderSize = size;
 		}
 
+		// PDFAnnotate.prototype.clearActivePage = function () {
+		// 	var inst = this;
+		// 	var fabricObj = inst.fabricObjects;
+		// 	var bg = fabricObj.backgroundImage;
+		// 	if (confirm('Are you sure?')) {
+		// 		fabricObj.clear();
+		// 		fabricObj.setBackgroundImage(bg, fabricObj.renderAll.bind(fabricObj));
+		// 	}
+		// }
+
 		PDFAnnotate.prototype.clearActivePage = function () {
 			var inst = this;
-			var fabricObj = inst.fabricObjects[inst.active_canvas];
+			var fabricObj = inst.fabricObjects;
 			var bg = fabricObj.backgroundImage;
-			if (confirm('Are you sure?')) {
-				fabricObj.clear();
-				fabricObj.setBackgroundImage(bg, fabricObj.renderAll.bind(fabricObj));
-			}
+			fabricObj.clear();
+			fabricObj.setBackgroundImage(bg, fabricObj.renderAll.bind(fabricObj));
+			
 		}
 
 		PDFAnnotate.prototype.serializePdf = function() {
@@ -971,8 +1000,7 @@
 							let pdfUrl = e.target.result;
 							window.pdf = new PDFAnnotate("pdf-container",pdfUrl, {
 								onPageUpdated(page, oldData, newData) {
-									console.log(page, oldData, newData);
-									// mementos.push({page, oldData, newData})
+									// console.log(page, oldData, newData);
 								},
 								ready() {
 									console.log("Plugin initialized successfully");
@@ -992,8 +1020,6 @@
 							b.value = ''
 							c.value = ''
 							d.style.display = "flex"
-							// setPdfError('Not a valid pdf: Please select only PDF');
-							// setPdfFile('');
 						}
 					}
 				else{
@@ -1034,6 +1060,18 @@
 				disableScroll()
 			}
 
+			function undo(event) {
+				event.preventDefault();
+				window.pdf.undoLast();		
+			}
+
+			function redo(event) {
+				event.preventDefault();
+				window.pdf.redoLast();	
+			}
+
+			
+
 			function enableAddText(event) {
 				event.preventDefault();
 				changeActiveTool(event);
@@ -1062,7 +1100,7 @@
 			function deleteSelectedObject() {
 				event.preventDefault();
 				window.pdf.removeLast();
-				}
+			}
 
 			this.saveInner = function() {
 				// pdf.savePdf(c.value);
